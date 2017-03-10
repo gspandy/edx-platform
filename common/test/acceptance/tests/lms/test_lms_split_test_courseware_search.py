@@ -8,7 +8,6 @@ from common.test.acceptance.tests.helpers import remove_file
 from common.test.acceptance.pages.common.logout import LogoutPage
 from common.test.acceptance.pages.studio.overview import CourseOutlinePage
 from common.test.acceptance.pages.lms.courseware_search import CoursewareSearchPage
-from common.test.acceptance.pages.lms.course_nav import CourseNavPage
 from common.test.acceptance.fixtures.course import XBlockFixtureDesc
 from common.test.acceptance.tests.helpers import create_user_partition_json
 
@@ -44,7 +43,6 @@ class SplitTestCoursewareSearchTest(ContainerBase):
         self.staff_user = self.user
 
         self.courseware_search_page = CoursewareSearchPage(self.browser, self.course_id)
-        self.course_navigation_page = CourseNavPage(self.browser)
         self.course_outline = CourseOutlinePage(
             self.browser,
             self.course_info['org'],

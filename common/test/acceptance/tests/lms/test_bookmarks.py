@@ -8,8 +8,8 @@ import requests
 from common.test.acceptance.pages.studio.auto_auth import AutoAuthPage as StudioAutoAuthPage
 from common.test.acceptance.pages.lms.auto_auth import AutoAuthPage as LmsAutoAuthPage
 from common.test.acceptance.pages.lms.bookmarks import BookmarksPage
+from common.test.acceptance.pages.lms.course_home import CourseHomePage
 from common.test.acceptance.pages.lms.courseware import CoursewarePage
-from common.test.acceptance.pages.lms.course_nav import CourseNavPage
 from common.test.acceptance.pages.studio.overview import CourseOutlinePage
 from common.test.acceptance.pages.common.logout import LogoutPage
 from common.test.acceptance.pages.common import BASE_URL
@@ -80,8 +80,8 @@ class BookmarksTest(BookmarksTestMixin):
         )
 
         self.courseware_page = CoursewarePage(self.browser, self.course_id)
+        self.course_home_page = CourseHomePage(self.browser, self.course_id)
         self.bookmarks_page = BookmarksPage(self.browser, self.course_id)
-        self.course_nav = CourseNavPage(self.browser)
 
         # Get session to be used for bookmarking units
         self.session = requests.Session()
@@ -267,7 +267,8 @@ class BookmarksTest(BookmarksTestMixin):
         """
         self._test_setup()
         for index in range(2):
-            self.course_nav.go_to_section('TestSection{}'.format(index), 'TestSubsection{}'.format(index))
+            self.course_home_page.visit()
+            self.course_home_page.outline.go_to_section('TestSection{}'.format(index), 'TestSubsection{}'.format(index))
 
             self._toggle_bookmark_and_verify(True, 'bookmarked', 1)
             self.bookmarks_page.click_bookmarks_button(False)

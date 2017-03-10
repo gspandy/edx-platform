@@ -4,8 +4,8 @@ LMS Course Home page object
 
 from bok_choy.page_object import PageObject
 
-from common.test.acceptance.pages.lms.course_nav import CourseNavPage
 from common.test.acceptance.pages.lms.course_page import CoursePage
+from common.test.acceptance.pages.lms.courseware import CoursewarePage
 
 
 class CourseHomePage(CoursePage):
@@ -22,6 +22,8 @@ class CourseHomePage(CoursePage):
         super(CourseHomePage, self).__init__(browser, course_id)
         self.course_id = course_id
         self.outline = CourseOutlinePage(browser, self)
+        # TODO: TNL-6546: Remove the following
+        self.unified_course_view = False
 
 
 class CourseOutlinePage(PageObject):
@@ -34,6 +36,7 @@ class CourseOutlinePage(PageObject):
     def __init__(self, browser, parent_page):
         super(CourseOutlinePage, self).__init__(browser)
         self.parent_page = parent_page
+        self.courseware_page = CoursewarePage(self.browser, self.parent_page.course_id)
 
     def is_browser_on_page(self):
         return self.parent_page.is_browser_on_page
@@ -101,6 +104,12 @@ class CourseOutlinePage(PageObject):
 
         # Click the subsection and ensure that the page finishes reloading
         self.q(css=subsection_css).first.click()
+        self.courseware_page.wait_for_page()
+
+        # TODO: TNL-6546: Remove this if/visit_unified_course_view
+        if self.parent_page.unified_course_view:
+            self.courseware_page.nav.visit_unified_course_view()
+
         self._wait_for_course_section(section_title, subsection_title)
 
     def _section_titles(self):
@@ -118,7 +127,7 @@ class CourseOutlinePage(PageObject):
         # Retrieve the subsection title for the section
         # Add one to the list index to get the CSS index, which starts at one
         subsection_css = (
-            # TNL-6387: Will need to switch to this selector for subsections
+            # TODO: TNL-6387: Will need to switch to this selector for subsections
             # ".outline-item.section:nth-of-type({0}) .subsection span:nth-of-type(1)"
             ".outline-item.section:nth-of-type({0}) .subsection a"
         ).format(section_index)
@@ -133,8 +142,7 @@ class CourseOutlinePage(PageObject):
         """
         Ensures the user navigates to the course content page with the correct section and subsection.
         """
-        course_nav = CourseNavPage(self.browser)
         self.wait_for(
-            promise_check_func=lambda: course_nav.is_on_section(section_title, subsection_title),
+            promise_check_func=lambda: self.courseware_page.nav.is_on_section(section_title, subsection_title),
             description="Waiting for course page with section '{0}' and subsection '{1}'".format(section_title, subsection_title)
         )

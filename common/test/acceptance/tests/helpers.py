@@ -225,6 +225,9 @@ def select_option_by_text(select_browser_query, option_text):
         try:
             select = Select(query.first.results[0])
             select.select_by_visible_text(value)
+            # If the element is still present, focus out of the element
+            if query.first.results[0]:
+                query.first.results[0].send_keys(u'\ue004')
             return True
         except StaleElementReferenceException:
             return False
@@ -291,6 +294,8 @@ def select_option_by_value(browser_query, value):
         # if value is not an option choice then it should return false
         if all_options_selected and not has_option:
             all_options_selected = False
+        if browser_query.first.results[0]:
+            browser_query.first.results[0].send_keys(u'\ue004')
         return all_options_selected
 
     # Make sure specified option is actually selected

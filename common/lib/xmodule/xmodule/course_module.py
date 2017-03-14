@@ -17,6 +17,7 @@ from xmodule import course_metadata_utils
 from xmodule.course_metadata_utils import DEFAULT_START_DATE
 from xmodule.graders import grader_from_conf
 from xmodule.mixin import LicenseMixin
+from xmodule.partitions.partitions import UserPartition, UserPartitionError, UserPartitionList
 from xmodule.seq_module import SequenceDescriptor, SequenceModule
 from xmodule.tabs import CourseTabList, InvalidTabsException
 from .fields import Date
@@ -821,6 +822,13 @@ class CourseFields(object):
         scope=Scope.settings
     )
 
+    user_partitions = UserPartitionList(
+        display_name=_("Group Configurations"),
+        help=_("Enter the configurations that govern how students are grouped together."),
+        default=[],
+        scope=Scope.settings
+    )
+
     """
     instructor_info dict structure:
     {
@@ -905,6 +913,26 @@ class CourseDescriptor(CourseFields, SequenceDescriptor, LicenseMixin):
 
         if self.discussion_topics == {}:
             self.discussion_topics = {_('General'): {'id': self.location.html_id()}}
+
+        try:
+            verification_track_scheme = UserPartition.get_scheme("enrollment_track")
+            if len(self.get_user_partitions_for_scheme(verification_track_scheme)) == 0:
+                used_ids = set(p.id for p in self.user_partitions)
+                new_id = 0
+                while new_id in used_ids:
+                    new_id += 1
+                partition = verification_track_scheme.create_user_partition(
+                    id=new_id,
+                    name=_(u"Enrollment Track Partition"),
+                    description=_(u"Partition for segmenting users by enrollment track"),
+                    parameters={"course_id": unicode(self.id)}
+                )
+                self.user_partitions.append(partition)
+
+        except UserPartitionError:
+            log.warning(
+                "No 'enrollment_track' scheme registered, EnrollmentTrackUserPartition will not be created."
+            )
 
         try:
             if not getattr(self, "tabs", []):

@@ -5,10 +5,9 @@ define(['backbone',
         'URI',
         'edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers',
         'common/js/spec_helpers/template_helpers',
-        'course_bookmarks/js/views/bookmarks_list_button',
         'course_bookmarks/js/views/bookmarks_list',
         'course_bookmarks/js/collections/bookmarks'],
-    function(Backbone, $, _, Logger, URI, AjaxHelpers, TemplateHelpers, BookmarksListButtonView,
+    function(Backbone, $, _, Logger, URI, AjaxHelpers, TemplateHelpers,
              BookmarksListView, BookmarksCollection) {
         'use strict';
 
@@ -35,8 +34,6 @@ define(['backbone',
                         };
                     }
                 });
-
-                bookmarksButtonView = new BookmarksListButtonView();
             });
 
             verifyRequestParams = function(requests, params) {

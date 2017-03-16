@@ -4,6 +4,7 @@ Views to show a course's bookmarks.
 
 from django.contrib.auth.decorators import login_required
 from django.core.context_processors import csrf
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
@@ -12,6 +13,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import View
 
 from courseware.courses import get_course_with_access
+from lms.djangoapps.courseware.tabs import CoursewareTab
 from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
 from util.views import ensure_valid_course_key
@@ -37,6 +39,8 @@ class CourseBookmarksView(View):
         """
         course_key = CourseKey.from_string(course_id)
         course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
+        course_url_name = CoursewareTab.main_course_url_name(request)
+        course_url = reverse(course_url_name, kwargs={'course_id': unicode(course.id)})
 
         # Render the bookmarks list as a fragment
         outline_fragment = CourseBookmarksFragmentView().render_to_fragment(request, course_id=course_id)
@@ -45,6 +49,7 @@ class CourseBookmarksView(View):
         context = {
             'csrf': csrf(request)['csrf_token'],
             'course': course,
+            'course_url': course_url,
             'outline_fragment': outline_fragment,
             'disable_courseware_js': True,
             'uses_pattern_library': True,
@@ -62,11 +67,11 @@ class CourseBookmarksFragmentView(EdxFragmentView):
         """
         course_key = CourseKey.from_string(course_id)
         course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
-        course_usage_key = modulestore().make_course_usage_key(course_key)
 
         context = {
             'csrf': csrf(request)['csrf_token'],
             'course': course,
+            'bookmarks_api_url': reverse('bookmarks'),
             'language_preference': 'en',  # TODO:
         }
         html = render_to_string('course_bookmarks/course-bookmarks-fragment.html', context)

@@ -1,13 +1,33 @@
 (function(define) {
     'use strict';
 
-    define([
-        'jquery',
-        'course_bookmarks/js/views/bookmarks_list_button'
-    ],
-        function($, BookmarksListButton) {
-            return function(options) {  // eslint-disable-line
-                new BookmarksListButton();  // eslint-disable-line no-new
+    define(
+        [
+            'jquery',
+            'js/views/message_banner',
+            'course_bookmarks/js/collections/bookmarks',
+            'course_bookmarks/js/views/bookmarks_list'
+        ],
+        function($, MessageBannerView, BookmarksCollection, BookmarksListView) {
+            return function(options) {
+                var courseId = options.courseId,
+                    bookmarksApiUrl = options.bookmarksApiUrl,
+                    bookmarksCollection = new BookmarksCollection([],
+                        {
+                            course_id: courseId,
+                            url: bookmarksApiUrl
+                        }
+                    );
+                var bookmarksListView = new BookmarksListView(
+                    {
+                        $el: options.$el,
+                        collection: bookmarksCollection,
+                        loadingMessageView: new MessageBannerView({el: $('#loading-message')}),
+                        errorMessageView: new MessageBannerView({el: $('#error-message')})
+                    }
+                );
+                bookmarksListView.render();
+                bookmarksListView.showBookmarks();
             };
         }
     );

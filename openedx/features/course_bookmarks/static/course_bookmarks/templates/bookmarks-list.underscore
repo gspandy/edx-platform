@@ -1,5 +1,4 @@
 <div id="my-bookmarks" class="sr-is-focusable" tabindex="-1"></div>
-<h2 class="bookmarks-results-header"><%- gettext("My Bookmarks") %></h2>
 
 <% if (bookmarksCollection.length) { %>
 
@@ -40,14 +39,14 @@
 <% } else {%>
 
     <div class="bookmarks-empty">
-        <div class="bookmarks-empty-header">
+        <h3 class="hd-4 bookmarks-empty-header">
             <span class="icon fa fa-bookmark-o bookmarks-empty-header-icon" aria-hidden="true"></span>
-            <%- gettext("You have not bookmarked any courseware pages yet.") %>
+            <%- gettext("You have not bookmarked any courseware pages yet") %>
             <br>
-        </div>
+        </h3>
         <div  class="bookmarks-empty-detail">
             <span class="bookmarks-empty-detail-title">
-                <%- gettext("Use bookmarks to help you easily return to courseware pages. To bookmark a page, select Bookmark in the upper right corner of that page. To see a list of all your bookmarks, select Bookmarks in the upper left corner of any courseware page.") %>
+                <%- gettext('Use bookmarks to help you easily return to courseware pages. To bookmark a page, click on "Bookmark this page" beneath the unit title.') %>
             </span>
         </div>
     </div>

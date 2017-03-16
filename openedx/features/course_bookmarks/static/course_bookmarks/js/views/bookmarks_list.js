@@ -93,22 +93,11 @@
                     return moment(isoDate).format('LL');
                 },
 
-                areBookmarksVisible: function() {
-                    return this.$('#my-bookmarks').is(':visible');
-                },
-
-                hideBookmarks: function() {
-                    this.$el.hide();
-                    $(this.coursewareResultsWrapperEl).hide();
-                    $(this.coursewareContentEl).css('display', 'table-cell');
-                },
-
                 showBookmarksContainer: function() {
                     $(this.coursewareContentEl).hide();
                     // Empty el if it's not empty to get the clean state.
                     this.$el.html('');
                     this.$el.show();
-                    $(this.coursewareResultsWrapperEl).css('display', 'table-cell');
                 },
 
                 showLoadingMessage: function() {

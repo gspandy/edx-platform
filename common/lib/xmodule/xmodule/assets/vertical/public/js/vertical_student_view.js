@@ -10,7 +10,7 @@ window.VerticalStudentView = function(runtime, element) {
             bookmarkId: $bookmarkButtonElement.data('bookmarkId'),
             usageId: $element.data('usageId'),
             bookmarked: $element.parent('#seq_content').data('bookmarked'),
-            apiUrl: $('.courseware-bookmarks-button').data('bookmarksApiUrl')
+            apiUrl: $bookmarkButtonElement.data('bookmarksApiUrl')
         });
     });
 };

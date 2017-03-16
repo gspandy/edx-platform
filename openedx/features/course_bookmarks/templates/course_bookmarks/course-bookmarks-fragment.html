@@ -4,6 +4,8 @@
 
 <%namespace name='static' file='../static_content.html'/>
 
-<section class="course-bookmarks" id="main">
-    <p>Hello!</p>
+<section class="course-bookmarks courseware-results-wrapper" id="main">
+    <div id="loading-message" aria-live="polite" aria-relevant="all"></div>
+    <div id="error-message" aria-live="polite"></div>
+    <div class="courseware-results search-results" data-course-id="${course.id}" data-lang-code="${language_preference}"></div>
 </section>

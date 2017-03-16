@@ -10,11 +10,11 @@ urlpatterns = [
     url(
         r'^$',
         CourseBookmarksView.as_view(),
-        name='edx.course_bookmarks.home',
+        name='openedx.course_bookmarks.home',
     ),
     url(
         r'^bookmarks_fragment$',
         CourseBookmarksFragmentView.as_view(),
-        name='edx.course_bookmarks.course_bookmarks_fragment_view',
+        name='openedx.course_bookmarks.course_bookmarks_fragment_view',
     ),
 ]

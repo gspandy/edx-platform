@@ -31,11 +31,6 @@ $bookmarked-icon: "\f02e"; // .fa-bookmark
       content: $bookmarked-icon;
       font-family: FontAwesome;
     }
-
-    &.is-active {
-      background-color: lighten($action-primary-bg,10%);
-      color: $white;
-    }
   }
 }
 

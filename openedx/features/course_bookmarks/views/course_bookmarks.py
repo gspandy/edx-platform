@@ -13,9 +13,9 @@ from django.views.generic import View
 
 from courseware.courses import get_course_with_access
 from opaque_keys.edx.keys import CourseKey
+from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
 from util.views import ensure_valid_course_key
 from web_fragments.fragment import Fragment
-from web_fragments.views import FragmentView
 from xmodule.modulestore.django import modulestore
 
 
@@ -52,26 +52,10 @@ class CourseBookmarksView(View):
         return render_to_response('course_bookmarks/course-bookmarks.html', context)
 
 
-class CourseBookmarksFragmentView(FragmentView):
+class CourseBookmarksFragmentView(EdxFragmentView):
     """
-    Course outline fragment to be shown in the unified course view.
+    Fragment view that shows a user's bookmarks for a course.
     """
-
-    def populate_children(self, block, all_blocks):
-        """
-        For a passed block, replace each id in its children array with the full representation of that child,
-        which will be looked up by id in the passed all_blocks dict.
-        Recursively do the same replacement for children of those children.
-        """
-        children = block.get('children') or []
-
-        for i in range(len(children)):
-            child_id = block['children'][i]
-            child_detail = self.populate_children(all_blocks[child_id], all_blocks)
-            block['children'][i] = child_detail
-
-        return block
-
     def render_to_fragment(self, request, course_id=None, **kwargs):
         """
         Renders the course outline as a fragment.
@@ -83,6 +67,11 @@ class CourseBookmarksFragmentView(FragmentView):
         context = {
             'csrf': csrf(request)['csrf_token'],
             'course': course,
+            'language_preference': 'en',  # TODO:
         }
         html = render_to_string('course_bookmarks/course-bookmarks-fragment.html', context)
-        return Fragment(html)
+        inline_js = render_to_string('course_bookmarks/course_bookmarks_js.template', context)
+        fragment = Fragment(html)
+        self.add_fragment_resource_urls(fragment)
+        fragment.add_javascript(inline_js)
+        return fragment

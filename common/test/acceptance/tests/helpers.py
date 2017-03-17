@@ -213,7 +213,7 @@ def enable_css_animations(page):
     """)
 
 
-def select_option_by_text(select_browser_query, option_text):
+def select_option_by_text(select_browser_query, option_text, focus_out=False):
     """
     Chooses an option within a select by text (helper method for Select's select_by_visible_text method).
 
@@ -226,7 +226,7 @@ def select_option_by_text(select_browser_query, option_text):
             select = Select(query.first.results[0])
             select.select_by_visible_text(value)
             # If the element is still present, focus out of the element
-            if query.first.results[0]:
+            if focus_out:
                 query.first.results[0].send_keys(u'\ue004')
             return True
         except StaleElementReferenceException:
@@ -270,7 +270,7 @@ def generate_course_key(org, number, run):
     return CourseLocator(org, number, run, deprecated=(default_store == 'draft'))
 
 
-def select_option_by_value(browser_query, value):
+def select_option_by_value(browser_query, value, focus_out=False):
     """
     Selects a html select element by matching value attribute
     """
@@ -294,7 +294,7 @@ def select_option_by_value(browser_query, value):
         # if value is not an option choice then it should return false
         if all_options_selected and not has_option:
             all_options_selected = False
-        if browser_query.first.results[0]:
+        if focus_out:
             browser_query.first.results[0].send_keys(u'\ue004')
         return all_options_selected
 

@@ -57,7 +57,7 @@ class _BaseTask(PersistOnFailureTask, LoggedTask):  # pylint: disable=abstract-m
 
 
 @task
-def compute_grades_for_course(course_key, offset, batch_size):
+def backfill_grades_for_course(course_key, offset, batch_size):
     pass
 
 

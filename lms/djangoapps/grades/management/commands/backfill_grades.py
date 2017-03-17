@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 import six
 
 from openedx.core.lib.command_utils import (
@@ -27,8 +27,8 @@ log = logging.getLogger(__name__)
 class Command(BaseCommand):
     """
     Example usage:
-        $ ./manage.py lms compute_grades --all_courses --settings=devstack
-        $ ./manage.py lms compute_grades 'edX/DemoX/Demo_Course' --settings=devstack
+        $ ./manage.py lms backfill_grades --all_courses --settings=devstack
+        $ ./manage.py lms backfill_grades 'edX/DemoX/Demo_Course' --settings=devstack
     """
     args = '<course_id course_id ...>'
     help = 'Computes and persists grade values for all learners in specified courses.'
@@ -80,15 +80,14 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-
         validate_dependent_option(options, 'routing_key', 'enqueue_task')  # Do we want enqueue_task to be optional?
 
         self._set_log_level(options)
 
-        for course_key in self._iter_course_keys(options):
-            self.enqueue_compute_grades_for_course_tasks(course_key, options)
+        for course_key in self._get_course_keys(options):
+            self.enqueue_backfill_grades_for_course_tasks(course_key, options)
 
-    def enqueue_compute_grades_for_course_tasks(self, course_key, options):
+    def enqueue_backfill_grades_for_course_tasks(self, course_key, options):
         """
         Enqueue celery tasks to compute and persist all grades for the
         specified course, in batches.
@@ -98,7 +97,7 @@ class Command(BaseCommand):
             # If any new enrollments are added after the tasks are fired off, they are already persisting grades.
             # so there is no need to worry about race conditions.
             task_options = {'routing_key': options['routing_key']} if options.get('routing_key') else {}
-            result = tasks.compute_grades_for_course.apply_async(
+            result = tasks.backfill_grades_for_course.apply_async(
                 kwargs={
                     'course_key': six.text_type(course_key),
                     'offset': offset,
@@ -113,25 +112,26 @@ class Command(BaseCommand):
                 end=offset + options['batch_size'],
             ))
 
-    def _iter_course_keys(self, options):
+    def _get_course_keys(self, options):
         """
         Return a list of courses that need scores computed.
         """
         courses_mode = get_mutually_exclusive_required_option(options, 'courses', 'all_courses')
         if courses_mode == 'all_courses':
-            course_keys = (course.id for course in modulestore().get_course_summaries())
+            course_keys = [course.id for course in modulestore().get_course_summaries()]
         else:
             course_keys = parse_course_keys(options['courses'])
-        course_keys = self._validate_course_keys(course_keys)
+        self._validate_course_keys(course_keys)
         return course_keys
 
     def _validate_course_keys(self, course_keys):
         """
-        Ensure that course keys are for existent courses.  Log a warning for
-        any courses that do not match a real course.
+        Ensure that course keys are for existent courses.  Raise CommandError
+        for any courses that do not match a real course.
         """
         for course_key in course_keys:
-            yield course_key
+            if False: # Check if course_key refers to a real course
+                raise CommandError("{} refers to a non-existent course".format(course_key))
 
     def _set_log_level(self, options):
         """

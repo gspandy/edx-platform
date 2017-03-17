@@ -14,7 +14,7 @@ from openedx.core.lib.command_utils import (
     validate_dependent_option,
     parse_course_keys,
 )
-#() from openedx.core.djangolib.waffle_utils import is_switch_enabled
+# from openedx.core.djangolib.waffle_utils import is_switch_enabled
 from student.models import CourseEnrollment
 from xmodule.modulestore.django import modulestore
 
@@ -79,25 +79,14 @@ class Command(BaseCommand):
             type=int,
         )
 
-    def _get_course_keys(self, options):
-        """
-        Return a list of courses that need scores computed.
-        """
-        courses_mode = get_mutually_exclusive_required_option(options, 'courses', 'all_courses')
-        if courses_mode == 'all_courses':
-            course_keys = [course.id for course in modulestore().get_course_summaries()]
-        else:
-            course_keys = parse_course_keys(options['courses'])
-        return course_keys
-
     def handle(self, *args, **options):
 
         validate_dependent_option(options, 'routing_key', 'enqueue_task')  # Do we want enqueue_task to be optional?
 
         self._set_log_level(options)
 
-        for course_key in self._get_course_keys(options):
-            self.enqueue_compute_grades_for_course(course_key, options)
+        for course_key in self._iter_course_keys(options):
+            self.enqueue_compute_grades_for_course_tasks(course_key, options)
 
     def enqueue_compute_grades_for_course_tasks(self, course_key, options):
         """
@@ -123,6 +112,26 @@ class Command(BaseCommand):
                 offset=offset,
                 end=offset + options['batch_size'],
             ))
+
+    def _iter_course_keys(self, options):
+        """
+        Return a list of courses that need scores computed.
+        """
+        courses_mode = get_mutually_exclusive_required_option(options, 'courses', 'all_courses')
+        if courses_mode == 'all_courses':
+            course_keys = (course.id for course in modulestore().get_course_summaries())
+        else:
+            course_keys = parse_course_keys(options['courses'])
+        course_keys = self._validate_course_keys(course_keys)
+        return course_keys
+
+    def _validate_course_keys(self, course_keys):
+        """
+        Ensure that course keys are for existent courses.  Log a warning for
+        any courses that do not match a real course.
+        """
+        for course_key in course_keys:
+            yield course_key
 
     def _set_log_level(self, options):
         """

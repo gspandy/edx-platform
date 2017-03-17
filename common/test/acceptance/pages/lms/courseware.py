@@ -560,3 +560,4 @@ class CourseNavPage(PageObject):
         self.unified_course_view = True
         # reload the same page with the unified course view
         self.browser.get(self.browser.current_url + "&unified_course_view=1")
+        self.wait_for_page()

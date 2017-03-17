@@ -46,7 +46,6 @@
             };
 
             ResponseCommentView.prototype.initialize = function(options) {
-                this.options = options;
                 this.startHeader = options.startHeader;
                 return ResponseCommentView.__super__.initialize.call(this);
             };

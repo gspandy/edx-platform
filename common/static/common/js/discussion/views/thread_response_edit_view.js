@@ -37,7 +37,6 @@
 
             ThreadResponseEditView.prototype.initialize = function(options) {
                 this.options = options;
-                this.startHeader = options.startHeader;
                 return ThreadResponseEditView.__super__.initialize.call(this);
             };
 

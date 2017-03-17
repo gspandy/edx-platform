@@ -59,7 +59,6 @@
             };
 
             ThreadResponseView.prototype.initialize = function(options) {
-                this.options = options;
                 this.startHeader = options.startHeader;
                 this.collapseComments = options.collapseComments;
                 this.createShowView();

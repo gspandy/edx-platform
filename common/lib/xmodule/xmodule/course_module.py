@@ -915,19 +915,38 @@ class CourseDescriptor(CourseFields, SequenceDescriptor, LicenseMixin):
             self.discussion_topics = {_('General'): {'id': self.location.html_id()}}
 
         try:
-            verification_track_scheme = UserPartition.get_scheme("enrollment_track")
-            if len(self.get_user_partitions_for_scheme(verification_track_scheme)) == 0:
+            enrollment_track_scheme = UserPartition.get_scheme("enrollment_track")
+            enrollment_track_partitions = self.get_user_partitions_for_scheme(enrollment_track_scheme)
+            if len(enrollment_track_partitions) == 0:
                 used_ids = set(p.id for p in self.user_partitions)
                 new_id = 0
                 while new_id in used_ids:
                     new_id += 1
-                partition = verification_track_scheme.create_user_partition(
+                partition = enrollment_track_scheme.create_user_partition(
                     id=new_id,
                     name=_(u"Enrollment Track Partition"),
                     description=_(u"Partition for segmenting users by enrollment track"),
                     parameters={"course_id": unicode(self.id)}
                 )
                 self.user_partitions.append(partition)
+            elif enrollment_track_partitions[0].parameters["course_id"] != unicode(self.id):
+                # With older courses, the first time through this code we may end up storing
+                # the "old mongo" version of the course key. If so, update it to the new version.
+                self.user_partitions.remove(enrollment_track_partitions[0])
+                partition = enrollment_track_scheme.create_user_partition(
+                    id=enrollment_track_partitions[0].id,
+                    name=_(u"Enrollment Track Partition"),
+                    description=_(u"Partition for segmenting users by enrollment track"),
+                    parameters={"course_id": unicode(self.id)}
+                )
+                self.user_partitions.append(partition)
+
+            if len(enrollment_track_partitions) > 1:
+                log.warning(
+                    "Multiple EnrollmentTrackUserPartitions found for course {course_id}".format(
+                        course_id=unicode(self.id)
+                    )
+                )
 
         except UserPartitionError:
             log.warning(

@@ -72,7 +72,7 @@ class BlockStructureModelTestCase(TestCase):
         bsm, created = BlockStructureModel.update_or_create(serialized_data, **self.params)
         if mock_log:
             self.assertEqual("Created" if expect_created else "Updated", mock_log.info.call_args[0][1])
-            self.assertEqual(len(serialized_data), mock_log.info.call_args[0][3])
+            self.assertEqual(len(serialized_data), mock_log.info.call_args[0][6])
         self._assert_bsm_fields(bsm, serialized_data)
         if expect_created is not None:
             self.assertEqual(created, expect_created)
@@ -93,7 +93,7 @@ class BlockStructureModelTestCase(TestCase):
         # get entry
         found_bsm = BlockStructureModel.get(self.usage_key)
         self._assert_bsm_fields(found_bsm, serialized_data)
-        self.assertIn("BlockStructure: Read data from store;", mock_log.info.call_args[0][0])
+        self.assertIn("Read", mock_log.info.call_args[0][1])
 
         # update entry
         self.params.update(dict(data_version='new version'))
